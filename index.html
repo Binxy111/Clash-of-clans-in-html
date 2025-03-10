@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Village Clash</title>
+<style>
+body {
+  font-family: sans-serif;
+  text-align: center;
+  background-color: #f0f0f0;
+}
+#game-container {
+  width: 800px;
+  margin: 20px auto;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  position: relative; /* Needed for absolute positioning of buildings */
+}
+.resource {
+  display: inline-block;
+  margin: 0 10px;
+}
+.button {
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin: 5px;
+}
+.building {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin: 5px;
+  display: inline-block;
+  position: absolute; /* Allows dragging */
+  cursor: move;
+}
+.troop {
+  border: 1px solid #ccc;
+  padding: 5px;
+  margin: 2px;
+  display: inline-block;
+}
+#attackLog {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-top: 10px;
+  text-align: left;
+  height: 100px;
+  overflow-y: scroll;
+}
+</style>
+</head>
+<body>
+<div id="game-container">
+  <h1>Village Clash</h1>
+
+  <div id="resources">
+    <div class="resource">Gold: <span id="gold">1000</span></div>
+    <div class="resource">Elixir: <span id="elixir">500</span></div>
+    <div class="resource">Dark Elixir: <span id="darkElixir">0</span></div>
+  </div>
+
+  <div id="buildings">
+    <h2>Buildings</h2>
+    <div class="building">Town Hall (Level <span id="townHallLevel">1</span>) <button class="button" onclick="upgradeTownHall()">Upgrade (1000 Gold)</button></div>
+    <div class="building">Gold Mine (Level <span id="goldMineLevel">1</span>) <button class="button" onclick="upgradeGoldMine()">Upgrade (500 Gold)</button></div>
+    <div class="building">Elixir Collector (Level <span id="elixirCollectorLevel">1</span>) <button class="button" onclick="upgradeElixirCollector()">Upgrade (500 Elixir)</button></div>
+    <div class="building">Barracks (Level <span id="barracksLevel">1</span>) <button class="button" onclick="upgradeBarracks()">Upgrade (750 Elixir)</button></div>
+    <div class="building">Archer Tower (Level <span id="archerTowerLevel">1</span>) <button class="button" onclick="upgradeArcherTower()">Upgrade (600 Gold)</button></div>
+  </div>
+
+  <div id="troops">
+    <h2>Troops</h2>
+    <p>Available Troops: <span id="troopCount">0</span></p>
+    <button class="button" onclick="trainTroop()">Train Archer 50 Elixir</button>
+    <div id="troopList"></div>
+  </div>
+
+  <div id="actions">
+    <h2>Actions</h2>
+    <button class="button" onclick="attackGoblin()">Attack Goblin Village (Single Player)</button>
+    <button class="button" onclick="findOpponent()">Find Opponent (Multiplayer)</button>
+    <button class="button" onclick="openClan()">Open Clan Menu</button>
+    <button class="button" onclick="openBuilderBase()">Go to Builder Base</button>
+  </div>
+
+  <div id="attackLog">
+    <h2>Attack Log</h2>
+  </div>
+</div>
+
+<script>
+let gold = 1000;
+let elixir = 500;
+let darkElixir = 0;
+let troopCount = 0;
+let townHallLevel = 1;
+let goldMineLevel = 1;
+let elixirCollectorLevel = 1;
+let barracksLevel = 1;
+let archerTowerLevel = 1;
+let troops = [];
+let attackLog = document.getElementById("attackLog");
+
+function updateResources() {
+  document.getElementById("gold").textContent = gold;
+  document.getElementById("elixir").textContent = elixir;
+  document.getElementById("darkElixir").textContent = darkElixir;
+  document.getElementById("troopCount").textContent = troopCount;
+  document.getElementById("townHallLevel").textContent = townHallLevel;
+  document.getElementById("goldMineLevel").textContent = goldMineLevel;
+  document.getElementById("elixirCollectorLevel").textContent = elixirCollectorLevel;
+  document.getElementById("barracksLevel").textContent = barracksLevel;
+  document.getElementById("archerTowerLevel").textContent = archerTowerLevel;
+}
+
+function trainTroop() {
+  if (elixir >= 50) {
+    elixir -= 50;
+    troopCount++;
+    troops.push("Archer");
+    updateTroopList();
+    updateResources();
+    addLog("Archer trained!");
+  } else {
+    addLog("Not enough Elixir!");
+  }
+}
+
+function updateTroopList() {
+    const troopListElement = document.getElementById("troopList");
+    troopListElement.innerHTML = "";
+    troops.forEach(troop => {
+        const troopElement = document.createElement("div");
+        troopElement.classList.add("troop");
+        troopElement.textContent = troop;
+        troopListElement.appendChild(troopElement);
+    });
+}
+
+function attackGoblin() {
+  gold += 200;
+  elixir += 100;
+  updateResources();
+  addLog("Goblin village attacked! Resources gained.");
+}
+
+function findOpponent() {
+  addLog("Searching for opponent... (Multiplayer functionality not fully implemented)");
+}
+
+function openClan() {
+    addLog("Clan menu opened. (Clan functionality not fully implemented)");
+}
+
+function openBuilderBase() {
+    addLog("Builder Base opened. (Builder Base functionality not fully implemented)");
+}
+
+function upgradeTownHall() {
+    if (gold >= 1000) {
+        gold -= 1000;
+        townHallLevel++;
+        updateResources();
+        addLog("Town Hall upgraded!");
+    } else {
+        addLog("Not enough Gold!");
+    }
+}
+
+function upgradeGoldMine() {
+    if (gold >= 500) {
+        gold -= 500;
+        goldMineLevel++;
+        updateResources();
+        addLog("Gold Mine upgraded!");
+    } else {
+        addLog("Not enough Gold!");
+    }
+}
+
+function upgradeElixirCollector() {
+    if (elixir >= 500) {
+        elixir -= 500;
+        elixirCollectorLevel++;
+        updateResources();
+        addLog("Elixir Collector upgraded!");
+    } else {
+        addLog("Not enough Elixir!");
+    }
+}
+
+function upgradeBarracks() {
+    if (elixir >= 750) {
+        elixir -= 750;
+        barracksLevel++;
+        updateResources();
+        addLog("Barracks upgraded!");
+    } else {
+        addLog("Not enough Elixir!");
+    }
+}
+
+function upgradeArcherTower() {
+    if (gold >= 600) {
+        gold -= 600;
+        archerTowerLevel++;
+        updateResources();
+        addLog("Archer Tower upgraded!");
+    } else {
+        addLog("Not enough Gold!");
+    }
+}
+
+function addLog(message) {
+    const logItem = document.createElement("p");
+    logItem.textContent = message;
+    attackLog.appendChild(logItem);
+    attackLog.scrollTop = attackLog.scrollHeight;
+}
+
+// Drag functionality
+document.querySelectorAll('.building').forEach(building => {
+  building.addEventListener('mousedown', (e) => {
+    draggedBuilding = building;
+    offsetX = e.clientX - draggedBuilding.offsetLeft;
+    offsetY = e.clientY - draggedBuilding.offsetTop;
+  });
+});
+
+document.addEventListener('mousemove', (e) => {
+  if (draggedBuilding) {
+    draggedBuilding.style.left = e.clientX - offsetX + 'px';
+    draggedBuilding.style.top = e.clientY - offsetY + 'px';
+  }
+});
+
+
+updateResources();
+updateTroopList();
+</script>
+
+</body>
+</html>
