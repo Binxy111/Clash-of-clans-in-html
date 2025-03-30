@@ -15,7 +15,7 @@ body {
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  position: relative; /* Needed for absolute positioning of buildings */
+  position: relative;
 }
 .resource {
   display: inline-block;
@@ -31,18 +31,24 @@ body {
   margin: 5px;
 }
 .building {
-  border: 1px solid #ccc;
-  padding: 10px;
-  margin: 5px;
-  display: inline-block;
-  position: absolute; /* Allows dragging */
+  position: absolute;
   cursor: move;
+  width: 80px;
+  height: 80px;
+  background-size: cover;
+  background-repeat: no-repeat;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
 }
 .troop {
-  border: 1px solid #ccc;
-  padding: 5px;
-  margin: 2px;
   display: inline-block;
+  margin: 5px;
+  width: 50px;
+  height: 50px;
+  background-size: cover;
+  background-repeat: no-repeat;
 }
 #attackLog {
   border: 1px solid #ccc;
@@ -52,6 +58,23 @@ body {
   height: 100px;
   overflow-y: scroll;
 }
+#opponentVillage {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-top: 10px;
+  display: none;
+}
+.resource img {
+  width: 30px;
+  height: 30px;
+  vertical-align: middle;
+}
+#defense {
+    position: absolute;
+    bottom: 0px;
+    left: 10px;
+    width: 200px;
+}
 </style>
 </head>
 <body>
@@ -59,24 +82,39 @@ body {
   <h1>Village Clash</h1>
 
   <div id="resources">
-    <div class="resource">Gold: <span id="gold">1000</span></div>
-    <div class="resource">Elixir: <span id="elixir">500</span></div>
-    <div class="resource">Dark Elixir: <span id="darkElixir">0</span></div>
+    <div class="resource"><img src="gold.png" alt="Gold"> Gold: <span id="gold">1000</span></div>
+    <div class="resource"><img src="elixir.png" alt="Elixir"> Elixir: <span id="elixir">500</span></div>
+    <div class="resource"><img src="dark_elixir.png" alt="Dark Elixir"> Dark Elixir: <span id="darkElixir">0</span></div>
   </div>
 
   <div id="buildings">
     <h2>Buildings</h2>
-    <div class="building">Town Hall (Level <span id="townHallLevel">1</span>) <button class="button" onclick="upgradeTownHall()">Upgrade (1000 Gold)</button></div>
-    <div class="building">Gold Mine (Level <span id="goldMineLevel">1</span>) <button class="button" onclick="upgradeGoldMine()">Upgrade (500 Gold)</button></div>
-    <div class="building">Elixir Collector (Level <span id="elixirCollectorLevel">1</span>) <button class="button" onclick="upgradeElixirCollector()">Upgrade (500 Elixir)</button></div>
-    <div class="building">Barracks (Level <span id="barracksLevel">1</span>) <button class="button" onclick="upgradeBarracks()">Upgrade (750 Elixir)</button></div>
-    <div class="building">Archer Tower (Level <span id="archerTowerLevel">1</span>) <button class="button" onclick="upgradeArcherTower()">Upgrade (600 Gold)</button></div>
+    <div class="building" id="townHall" style="left: 100px; top: 50px; background-image: url('town_hall.png');">
+      Town Hall (Level <span id="townHallLevel">1</span>)
+      <button class="button" onclick="upgradeTownHall()">Upgrade (1000 Gold)</button>
+    </div>
+    <div class="building" id="goldMine" style="left: 250px; top: 100px; background-image: url('gold_mine.png');">
+      Gold Mine (Level <span id="goldMineLevel">1</span>)
+      <button class="button" onclick="upgradeGoldMine()">Upgrade (500 Gold)</button>
+    </div>
+    <div class="building" id="elixirCollector" style="left: 400px; top: 50px; background-image: url('elixir_collector.png');">
+      Elixir Collector (Level <span id="elixirCollectorLevel">1</span>)
+      <button class="button" onclick="upgradeElixirCollector()">Upgrade (500 Elixir)</button>
+    </div>
+    <div class="building" id="barracks" style="left: 150px; top: 200px; background-image: url('barracks.png');">
+      Barracks (Level <span id="barracksLevel">1</span>)
+      <button class="button" onclick="upgradeBarracks()">Upgrade (750 Elixir)</button>
+    </div>
+    <div class="building" id="archerTower" style="left: 350px; top: 200px; background-image: url('archer_tower.png');">
+      Archer Tower (Level <span id="archerTowerLevel">1</span>)
+      <button class="button" onclick="upgradeArcherTower()">Upgrade (600 Gold)</button>
+    </div>
   </div>
 
   <div id="troops">
     <h2>Troops</h2>
     <p>Available Troops: <span id="troopCount">0</span></p>
-    <button class="button" onclick="trainTroop()">Train Archer 50 Elixir</button>
+    <button class="button" onclick="trainTroop()">Train Archer (50 Elixir)</button>
     <div id="troopList"></div>
   </div>
 
@@ -91,6 +129,17 @@ body {
   <div id="attackLog">
     <h2>Attack Log</h2>
   </div>
+
+  <div id="opponentVillage">
+    <h2>Opponent Village</h2>
+    <p>Opponent Town Hall (Level <span id="opponentTownHallLevel">2</span>)</p>
+    <button class="button" onclick="attackOpponent()">Attack Opponent</button>
+  </div>
+
+    <div id="defense">
+        <h2>Defense</h2>
+        <p>Defensive Strength: <span id="defenseStrength">100</span></p>
+    </div>
 </div>
 
 <script>
@@ -105,6 +154,12 @@ let barracksLevel = 1;
 let archerTowerLevel = 1;
 let troops = [];
 let attackLog = document.getElementById("attackLog");
+let opponentVillage = document.getElementById("opponentVillage");
+let opponentTownHallLevel = 2;
+let draggedBuilding = null;
+let offsetX = 0;
+let offsetY = 0;
+let defenseStrength = 100;
 
 function updateResources() {
   document.getElementById("gold").textContent = gold;
@@ -116,6 +171,8 @@ function updateResources() {
   document.getElementById("elixirCollectorLevel").textContent = elixirCollectorLevel;
   document.getElementById("barracksLevel").textContent = barracksLevel;
   document.getElementById("archerTowerLevel").textContent = archerTowerLevel;
+  document.getElementById("opponentTownHallLevel").textContent = opponentTownHallLevel;
+  document.getElementById("defenseStrength").textContent = defenseStrength;
 }
 
 function trainTroop() {
@@ -137,7 +194,7 @@ function updateTroopList() {
     troops.forEach(troop => {
         const troopElement = document.createElement("div");
         troopElement.classList.add("troop");
-        troopElement.textContent = troop;
+        troopElement.style.backgroundImage = "url('archer.png')";
         troopListElement.appendChild(troopElement);
     });
 }
@@ -150,7 +207,23 @@ function attackGoblin() {
 }
 
 function findOpponent() {
-  addLog("Searching for opponent... (Multiplayer functionality not fully implemented)");
+  opponentVillage.style.display = "block";
+  addLog("Opponent found!");
+}
+
+function attackOpponent() {
+    if (troops.length > 0){
+        let goldGain = opponentTownHallLevel * 150;
+        let elixirGain = opponentTownHallLevel * 75;
+        gold += goldGain;
+        elixir += elixirGain;
+        defenseStrength -= 20;
+        updateResources();
+        addLog("Opponent attacked! Resources gained.");
+    } else {
+        addLog("You need troops to attack.");
+    }
+
 }
 
 function openClan() {
@@ -167,6 +240,7 @@ function upgradeTownHall() {
         townHallLevel++;
         updateResources();
         addLog("Town Hall upgraded!");
+        defenseStrength += 50;
     } else {
         addLog("Not enough Gold!");
     }
@@ -211,6 +285,7 @@ function upgradeArcherTower() {
         archerTowerLevel++;
         updateResources();
         addLog("Archer Tower upgraded!");
+        defenseStrength += 30;
     } else {
         addLog("Not enough Gold!");
     }
@@ -223,7 +298,6 @@ function addLog(message) {
     attackLog.scrollTop = attackLog.scrollHeight;
 }
 
-// Drag functionality
 document.querySelectorAll('.building').forEach(building => {
   building.addEventListener('mousedown', (e) => {
     draggedBuilding = building;
@@ -239,6 +313,9 @@ document.addEventListener('mousemove', (e) => {
   }
 });
 
+document.addEventListener('mouseup', () => {
+  draggedBuilding = null;
+});
 
 updateResources();
 updateTroopList();
